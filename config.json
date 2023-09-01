@@ -1,0 +1,23 @@
+{
+    "license_path": "deps/lpr/test-license/license.lic",
+    "model_path": "deps/lpr/models/M_LPR_IMX8_INT8_0.9.5.model",
+    "lpd_param_path": "deps/gaze/test-json/LPD.json",
+    "lpr_param_path": "deps/gaze/test-json/LPR.json",
+    "inference_path": "/misc/smartcamera/dnn_out/InferenceData",
+    "raw_path": "/misc/smartcamera/dnn_out/Raw",
+    "mqtt_param": {
+        "mqtt_broker_ip": "10.152.182.23",
+        "mqtt_broker_port": "6000",
+        "camera_id": "lpr_1",
+        "mqtt_sendbuf_size": 2000000,
+        "mqtt_recvbuf_size": 1024
+    },
+    "InputTensorToRawZoomInParam": {
+        "input_tensor_x_magnify": 6.3375,
+        "input_tensor_y_magnify": 6.3333,
+        "input_tensor_x_offset": 0,
+        "input_tensor_y_offset": 0
+    },
+    "draw_result": false,
+    "draw_result_rate": 1
+}

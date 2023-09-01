@@ -1,0 +1,5 @@
+{
+    "vehicle_detection_threshold": 0.3,
+    "plate_detection_threshold": 0.3,
+    "nms_threshold": 0.5
+}
