@@ -506,7 +506,7 @@ static int ReceiveDataFromFile()
                 }
             }
 
-            // crop nv12 to vehicle size and convert to bgr888
+            //2. crop nv12 to vehicle size and convert to bgr888
             int crop_x = lpd_result[0].vehicle_bbox.left * x_magnify + x_offset;
             int crop_y = lpd_result[0].vehicle_bbox.top * y_magnify + y_offset;
             int crop_width =
@@ -536,115 +536,8 @@ static int ReceiveDataFromFile()
             convertLPDResult(lpd_result, lpd_result_len);
             tensor_image.lpd_result = lpd_result;
             tensor_image.lpd_result_len = lpd_result_len;
-
-#if 0
-
-            // process 4k image
-            cv::Mat nv12_mat;
-            cv::Mat img_mat;
-            {
-                timeRecoder tr("===> create nv12 mat");
-                // LOGI("start to cvt nv12 to rgb24");
-
-                nv12_mat.create(height * 3 / 2, width, CV_8UC1);
-                memcpy(nv12_mat.data, nv_buf, width * height * 3 / 2);
-                // release nv12 data
-                // delete[] nv_buf;
-                // mmap release
-                munmap(nv_buf, nv_size);
-                // 2.cvt nv12 mat to rgb24 mat
-                // cvtColor(nv12_mat, img_mat, cv::COLOR_YUV2BGR_NV12);
-                // 3.
-                // imwrite("./new.jpg", img_mat);
-                // LOGI("end to cvt nv12 to rgb24");
-            }
-
-            // convert to BGR and then crop
-            {
-                timeRecoder tr("===> cvt nv12 to rgb24");
-                LOGI("crop nv12 mat w: %d, h: %d", nv12_mat.cols, nv12_mat.rows);
-                img_mat = cv::Mat(nv12_mat.rows, nv12_mat.cols, CV_8UC3);
-                cvtColor(nv12_mat, img_mat, cv::COLOR_YUV2BGR_NV12);
-                LOGI("nv12_mat w: %d, h: %d, channel:%d, total:%d", nv12_mat.cols, nv12_mat.rows,
-                     nv12_mat.channels(), nv12_mat.total());
-                LOGI("img_mat w: %d, h: %d, channel:%d, total:%d", img_mat.cols, img_mat.rows,
-                     img_mat.channels(), img_mat.total());
-
-                // cv::imwrite("./img_mat.jpg", img_mat);
-            }
-#ifdef CROP_VEHICLE
-            // crop vehicle in bgr mat
-            {
-                timeRecoder tr("===> crop vehicle bgr mat");
-                int crop_x = lpd_result[0].vehicle_bbox.left * x_magnify + x_offset;
-                int crop_y = lpd_result[0].vehicle_bbox.top * y_magnify + y_offset;
-                int crop_width =
-                    (lpd_result[0].vehicle_bbox.right - lpd_result[0].vehicle_bbox.left)
-                    * x_magnify;
-                int crop_height =
-                    (lpd_result[0].vehicle_bbox.bottom - lpd_result[0].vehicle_bbox.top)
-                    * y_magnify;
-                LOGI("crop_x: %d, crop_y: %d, crop_width: %d, "
-                     "crop_height: %d",
-                     crop_x, crop_y, crop_width, crop_height);
-                cv::Rect roi(crop_x, crop_y, crop_width, crop_height);
-                cv::Mat cropped_mat;
-                cropped_mat = img_mat(roi);
-                // cv::imwrite("./cropped_mat.jpg", cropped_mat);
-                // LOGI("cropped_mat w: %d, h: %d, channels:%d, total:%d",
-                            cropped_mat.cols,
-                            //      cropped_mat.rows, cropped_mat.channels(),
-                            cropped_mat.total());
-
-                            unsigned char *image_data =
-                                new unsigned char[crop_height * crop_width * 3];
-                            memcpy(image_data, cropped_mat.data, crop_height * crop_width * 3);
-                            TS_LPR_image_t image = {image_data, cropped_mat.cols,
-                                                    cropped_mat.rows, cropped_mat.channels(),
-                                                    TS_PIX_FMT_BGR888};
-                            tensor_image.image = image;
-
-                            LOGI("tensor_image.image ptr: %p", tensor_image.image.image_data);
-                            LOGI("tensor_image.image width: %d, height: %d, channel: %d,
-                                 format
-                                 :
-                                 % d ",
-                                     image.width,
-                                 image.height, image.channel, image.format);
-                            cv::Mat test_mat =
-                                cv::Mat(image.height, image.width, CV_8UC3, image.image_data);
-                            // LOGI("test_mat w: %d, h: %d, channels:%d, total:%d",
-                            test_mat.cols,
-                                // test_mat.rows,
-                                //      test_mat.channels(), test_mat.total());
-                                // cv::imwrite("./tensor_mat.jpg", test_mat);
-                                // test_mat.release();
-
-                                img_mat.release();
-                            nv12_mat.release();
-                            cropped_mat.release();
-            }
-
-            // // convert LPD result
-            convertLPDResult(lpd_result, lpd_result_len);
-            tensor_image.lpd_result = lpd_result;
-            tensor_image.lpd_result_len = lpd_result_len;
-#else
-            // not convert LPD result
-            tensor_image.lpd_result = lpd_result;
-            tensor_image.lpd_result_len = lpd_result_len;
-            // allocate memory for image
-            unsigned char *image_data = new unsigned char[img_mat.rows * img_mat.cols * 3];
-            memcpy(image_data, img_mat.data, img_mat.rows * img_mat.cols * 3);
-            TS_LPR_image_t image = {image_data, img_mat.cols, img_mat.rows, img_mat.channels(),
-                                    TS_PIX_FMT_BGR888};
-
-            tensor_image.image = image;
-            // img_mat.release();
-            // nv12_mat.release();
-#endif
-#endif
-            // 4. get timestamp
+            
+	    // 3. get timestamp
             std::string UTC_time = split_string(image_name, ".").front();
             UTC_time = split_string(UTC_time, "_").front();
             LOGI("UTC_time: %s", UTC_time.c_str());
